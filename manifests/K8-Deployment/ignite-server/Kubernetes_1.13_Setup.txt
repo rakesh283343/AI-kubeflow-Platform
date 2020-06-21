@@ -1,0 +1,120 @@
+CALICO:
+
+kubeadm reset
+iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+kubectl apply -f \
+https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/etcd.yaml
+
+kubectl apply -f \
+https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml
+
+UNINSTALL & REINSTALL KUBERNETES:
+sudo -s
+kubeadm reset
+apt-get purge kubeadm kubectl kubelet kubernetes-cni kube*   
+apt-get autoremove  
+sudo rm -rf ~/.kube
+
+kubectl drain <node name> --delete-local-data --force --ignore-daemonsets
+kubectl delete node <node name>
+
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+deb http://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+apt-get update
+apt-get install -y kubeadm=1.15.0-00 kubectl=1.15.0-00 kubelet=1.15.0-00 kubernetes-cni=0.7.5-00
+
+
+
+
+FLANNEL:
+
+kubeadm reset
+iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+ipvsadm --clear
+
+
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/2140ac876ef134e0ed5af15c65e414cf26827915/Documentation/kube-flannel.yml
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+kubeadm join 192.168.1.243:6443 --token mypcum.s5pn2ldbhr69xor2 --discovery-token-ca-cert-hash sha256:082e8e5311d48432cc1453890710c38c085e6cb183e6603e2e9d4c9ac1b5307e
+
+kubectl taint nodes --all node-role.kubernetes.io/master-
+
+kubectl get all --all-namespaces
+
+
+COREDNS ERROR:
+
+
+kubectl logs coredns-5c98db65d4-qv5tm -n kube-system
+.:53
+2019-12-27T14:42:43.802Z [INFO] CoreDNS-1.3.1
+2019-12-27T14:42:43.802Z [INFO] linux/amd64, go1.11.4, 6b56a9c
+CoreDNS-1.3.1
+linux/amd64, go1.11.4, 6b56a9c
+2019-12-27T14:42:43.802Z [INFO] plugin/reload: Running configuration MD5 = 5d5369fbc12f985709b924e721217843
+2019-12-27T14:42:43.803Z [FATAL] plugin/loop: Loop (127.0.0.1:53754 -> :53) detected for zone ".", see https://coredns.io/plugins/loop#troubleshooting. Query: "HINFO 4142559687393037902.3998329434494583584."
+
+Resolution Steps:
+
+1. Edit sudo nano /etc/resolv.conf
+
+nameserver 8.8.8.8
+
+save it.
+
+2.
+
+(base) system@AI-BEAST:/run/systemd$ kubectl get po --all-namespaces
+NAMESPACE     NAME                               READY   STATUS             RESTARTS   AGE
+kube-system   coredns-5c98db65d4-qv5tm           0/1     CrashLoopBackOff   9          26m
+kube-system   coredns-5c98db65d4-sg4q4           0/1     CrashLoopBackOff   9          26m
+kube-system   etcd-ai-beast                      1/1     Running            0          25m
+kube-system   kube-apiserver-ai-beast            1/1     Running            0          25m
+kube-system   kube-controller-manager-ai-beast   1/1     Running            0          25m
+kube-system   kube-flannel-ds-amd64-wnjc7        1/1     Running            0          24m
+kube-system   kube-proxy-z7s4j                   1/1     Running            0          26m
+kube-system   kube-scheduler-ai-beast            1/1     Running            0          25m
+
+COREDNS PODS STILL CRASHING:
+
+Steps:
+
+1.
+(base) system@AI-BEAST:/run/systemd$ kubectl delete po coredns-5c98db65d4-qv5tm coredns-5c98db65d4-sg4q4 -n kube-system
+pod "coredns-5c98db65d4-qv5tm" deleted
+pod "coredns-5c98db65d4-sg4q4" deleted
+
+2.Check the status CoreDNS is running now.
+
+(base) system@AI-BEAST:/run/systemd$ kubectl get po --all-namespaces
+NAMESPACE     NAME                               READY   STATUS    RESTARTS   AGE
+kube-system   coredns-5c98db65d4-grg4h           1/1     Running   0          12s
+kube-system   coredns-5c98db65d4-h59nm           1/1     Running   0          12s
+kube-system   etcd-ai-beast                      1/1     Running   0          26m
+kube-system   kube-apiserver-ai-beast            1/1     Running   0          26m
+kube-system   kube-controller-manager-ai-beast   1/1     Running   0          26m
+kube-system   kube-flannel-ds-amd64-wnjc7        1/1     Running   0          25m
+kube-system   kube-proxy-z7s4j                   1/1     Running   0          27m
+kube-system   kube-scheduler-ai-beast            1/1     Running   0          26m
+
+
+
+
+
+

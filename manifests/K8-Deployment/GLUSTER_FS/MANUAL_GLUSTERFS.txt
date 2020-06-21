@@ -1,0 +1,92 @@
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:gluster/glusterfs-3.12
+sudo apt-get update
+
+gluster volume create kube_vol transport tcp 192.168.1.243:/home/system/glusterfs_data force
+sudo gluster volume start kube_vol
+
+sudo gluster volume delete kube_vol
+
+sudo gluster volume create kube_vol transport tcp 192.168.1.243:/data/kube_vol force
+
+
+
+
+
+
+
+
+
+
+
+
+1.sudo nano /etc/hosts
+
+192.168.0.101 GlusterFS1
+192.168.0.102 GlusterFS2
+192.168.0.103 GlusterFS-Client
+
+2.Test:
+ping GlusterFS1
+ping GlusterFS2
+ping GlusterFS-Client
+
+3.sudo apt-get install software-properties-common -y
+
+4.sudo add-apt-repository ppa:gluster/glusterfs-3.10
+
+5.sudo apt-get update -y
+
+6.sudo apt-get install glusterfs-server -y
+
+7.systemctl start glusterfs-server 
+
+8.systemctl enable glusterfs-server
+
+9.systemctl status glusterfs-server
+
+9.sudo fdisk /dev/sdb
+
+10.mkfs.ext4 /dev/sdb1
+
+11.mkdir /glusterfs
+
+12.mount /dev/sdb1 /glusterfs
+
+13.sudo nano /etc/fstab
+
+/dev/sdb1 /glusterfs ext4 defaults 0 0
+
+gluster peer probe GlusterFS2
+
+gluster pool list
+
+sudo mkdir /glusterfs/kube_vol
+
+
+gluster volume create kube_vol replica 2 GlusterFS1:/glusterfs/kube_vol GlusterFS2:/glusterfs/kube_vol
+
+gluster volume start kube_vol
+
+gluster volume info kube_vol
+
+sudo apt-get install software-properties-common -y
+
+sudo add-apt-repository ppa:gluster/glusterfs-3.10
+
+sudo apt-get install glusterfs-client -y
+
+sudo mount -t glusterfs GlusterFS1:/kube_vol /mnt
+
+GlusterFS1:/kube_vol /glusterfs glusterfs  defaults,_netdev 0 0
+
+sudo mount -t glusterfs GlusterFS2:/kube_vol /mnt
+
+GlusterFS2:/kube_vol /glusterfs glusterfs  defaults,_netdev 0 0
+
+sudo touch glusterfs/test1
+
+sudo ufw allow proto any from 192.168.1.243 to 192.168.1.244
+sudo ufw allow proto any from 192.168.1.244 to 192.168.1.243
+
+

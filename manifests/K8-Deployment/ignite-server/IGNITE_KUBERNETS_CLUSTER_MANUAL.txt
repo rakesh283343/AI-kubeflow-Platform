@@ -1,0 +1,118 @@
+CALICO:
+
+kubeadm reset
+iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+kubectl apply -f \
+https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/etcd.yaml
+
+kubectl apply -f \
+https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml
+
+FLANNEL:
+
+kubeadm reset
+iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+ipvsadm --clear
+
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16 
+export KUBECONFIG=/etc/kubernetes/admin.conf
+
+
+##For Running kubectl as non-root user:
+Switch to non-root user
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+sysctl net.bridge.bridge-nf-call-iptables=1
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+kubeadm join 192.168.1.243:6443 --token mypcum.s5pn2ldbhr69xor2 --discovery-token-ca-cert-hash sha256:082e8e5311d48432cc1453890710c38c085e6cb183e6603e2e9d4c9ac1b5307e
+
+kubectl taint nodes --all node-role.kubernetes.io/master-
+
+kubectl get all --all-namespaces
+
+
+
+
+
+
+Go to Docker Directory:
+cd ~/ignite-kubetnetes-static-ip
+docker build -t kaustav4284/ignite-2.7:k8cluster-static-ip2 .
+docker push kaustav4284/ignite-2.7:k8cluster-static-ip2
+
+
+sudo kubeadm join 192.168.1.243:6443 --token wd7ggm.3wytciaqmeptz6bp --discovery-token-ca-cert-hash sha256:082e8e5311d48432cc1453890710c38c085e6cb183e6603e2e9d4c9ac1b5307e
+
+openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | \
+   openssl dgst -sha256 -hex | sed 's/^.* //'
+
+kubectl run telstra-ignite-pred --image=kaustav4284/telstra-tf-stream-predict06:firsttry
+
+kubectl delete -f ignite-namespace.yaml
+kubectl create -f ignite-namespace.yaml
+
+kubectl delete -f ignite-service-account.yaml
+kubectl create -f ignite-service-account.yaml
+
+kubectl delete -f ignite-account-role.yaml
+kubectl create -f ignite-account-role.yaml
+
+kubectl delete -f ignite-role-binding.yaml
+kubectl create -f ignite-role-binding.yaml
+
+kubectl config set-context $(kubectl config current-context) --namespace=ignite
+
+kubectl delete -f ignite-service.yaml
+kubectl create -f ignite-service.yaml
+
+kubectl delete -f ignite-deployment.yaml
+kubectl create -f ignite-deployment.yaml
+
+kubectl get pods -o wide
+
+kubectl 
+
+
+
+kubectl delete -f ignite-client-deployment.yaml
+kubectl create -f ignite-client-deployment.yaml
+
+kubectl scale --replicas=4 -f ignite-deployment.yaml 
+
+kubectl create -f local_storage_class.yaml
+
+kubectl patch storageclass local-storage -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+
+GLUSTERFS STORAGE:
+kubectl create -f glusterfs-endpoints.json
+kubectl create -f glusterfs-service.json
+
+KUBERNETES GPU:
+
+NVIDIA Container Runtime for Docker
+
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - 
+
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+sudo apt-get update
+
+sudo apt-get install -y nvidia-docker2
+sudo pkill -SIGHUP dockerd
+
+docker run --runtime=nvidia --rm nvidia/cuda:9.0-base nvidia-smi
+
+kubectl get ds -n=kube-system -l name=nvidia-device-plugin-ds
+
+

@@ -1,0 +1,25 @@
+{
+    "apiVersion": "v1",
+    "kind": "Namespace",
+    "metadata": {
+        "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Namespace\",\"metadata\":{\"annotations\":{},\"labels\":{\"istio-injection\":\"disabled\"},\"name\":\"istio-system\"}}\n"
+        },
+        "creationTimestamp": "2020-06-21T07:50:46Z",
+        "deletionTimestamp": "2020-06-21T07:56:14Z",
+        "labels": {
+            "istio-injection": "disabled"
+        },
+        "name": "istio-system",
+        "resourceVersion": "935880",
+        "selfLink": "/api/v1/namespaces/istio-system",
+        "uid": "a3508ba2-8c54-42c9-a4ca-50e8f34e7efd"
+    },
+    "spec": {
+        "finalizers": [
+        ]
+    },
+    "status": {
+        "phase": "Terminating"
+    }
+}

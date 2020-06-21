@@ -1,0 +1,23 @@
+{
+    "apiVersion": "v1",
+    "kind": "Namespace",
+    "metadata": {
+        "creationTimestamp": "2020-06-21T07:50:34Z",
+        "deletionTimestamp": "2020-06-21T07:56:11Z",
+        "labels": {
+            "control-plane": "kubeflow",
+            "katib-metricscollector-injection": "enabled"
+        },
+        "name": "kubeflow",
+        "resourceVersion": "933242",
+        "selfLink": "/api/v1/namespaces/kubeflow",
+        "uid": "b607a018-3163-42da-860e-d7ea555ceb8c"
+    },
+    "spec": {
+        "finalizers": [
+        ]
+    },
+    "status": {
+        "phase": "Terminating"
+    }
+}

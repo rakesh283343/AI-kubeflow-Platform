@@ -1,0 +1,12 @@
+NAME: superset-1592685616
+LAST DEPLOYED: Sun Jun 21 02:10:23 2020
+NAMESPACE: kubeflow
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+Superset can be accessed via port 9000 on the following DNS name from within your cluster:
+superset-1592685616.kubeflow.svc.cluster.local
+
+Initially you can login with username/password: admin/admin.
+WARNING: Persistence is DISABLED !

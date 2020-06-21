@@ -1,0 +1,15 @@
+NAME: airflow-1592687197
+LAST DEPLOYED: Sun Jun 21 02:36:44 2020
+NAMESPACE: kubeflow
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+Congratulations. You have just deployed Apache Airflow!
+
+1. Get the Airflow Service URL by running these commands:
+   export POD_NAME=$(kubectl get pods --namespace kubeflow -l "component=web,app=airflow" -o jsonpath="{.items[0].metadata.name}")
+   echo http://127.0.0.1:8080
+   kubectl port-forward --namespace kubeflow $POD_NAME 8080:8080
+
+2. Open Airflow in your web browser
